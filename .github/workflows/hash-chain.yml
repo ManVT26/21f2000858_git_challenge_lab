@@ -1,0 +1,27 @@
+name: Hash Chain Verification
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Compute verify hash marker fc610e1a
+        env:
+          MY_SECRET: ${{ secrets.MY_SECRET }}
+        run: |
+          VERIFY_HASH=$(printf '%s' "${MY_SECRET}github-verified" | sha256sum | cut -c1-10)
+          echo "Computed verify hash: $VERIFY_HASH"
+          mkdir -p out
+          printf '%s' "$VERIFY_HASH" > out/verify-hash.txt
+
+      - name: Upload verify-hash artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-hash-fc610e1a
+          path: out/verify-hash.txt
